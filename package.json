@@ -41,7 +41,11 @@
     "dev": "rollup -c -w",
     "prepublish": "rm -Rf dist/ && yarn build"
   },
-  "dependencies": {},
+  "dependencies": {
+    "kuroshiro": "^1.1.1",
+    "kuroshiro-analyzer-kuromoji": "^1.1.0",
+    "xmlhttprequest": "^1.8.0"
+  },
   "devDependencies": {
     "@google-cloud/translate": "^0.8.2",
     "@google/maps": "^0.3.1",
@@ -122,14 +126,6 @@
       "max-len": [
         "error",
         80
-      ],
-      "semi": [
-        "error",
-        "never"
-      ],
-      "comma-dangle": [
-        "error",
-        "always-multiline"
       ],
       "space-before-function-paren": [
         "error",
