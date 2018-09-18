@@ -19,3 +19,5 @@ config.json
 event.json
 .env
 gcp-keyfile.json
+.node-*
+.vscode/
