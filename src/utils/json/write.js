@@ -1,10 +1,10 @@
-import path from 'path'
-import jsonfile from 'jsonfile'
+const path = require('path')
+const jsonfile = require('jsonfile')
 
 jsonfile.spaces = 2
 
 const ROOT = path.resolve(__dirname, '..', '..', '..')
 
-export default function jsonWrite (file, data) {
+module.exports = function jsonWrite (file, data) {
   return jsonfile.writeFileSync(path.join(ROOT, file), data)
-}
+};
