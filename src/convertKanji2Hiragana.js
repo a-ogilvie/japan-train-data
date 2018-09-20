@@ -33,6 +33,17 @@ const stations = data.reduce(
 
 async function convertKanjiToHiragana () {
   await kuroshiro.init(new KuromojiAnalyzer());
+
+  const kanji = await kuroshiro.convert('東京', {
+    to: 'hiragana',
+  });
+  const romaji = await kuroshiro.convert('東京', {
+    to: 'romaji',
+    romajiSystem: 'passport',
+  });
+
+  console.log({ kanji, romaji });
+
   for (let i = 0; i < stations.length; i++) {
     const translation = await kuroshiro.convert(`${stations[i].name.ja}駅`, {
       to: 'hiragana',
@@ -40,7 +51,7 @@ async function convertKanjiToHiragana () {
 
     original.forEach((prefecture) => {
       prefecture.lines.forEach((line) => {
-        line.stations.forEach((station) => {
+        line.stations.forEach(async (station) => {
           if (station.id === stations[i].id) {
             // do the conversion
             station.name.hiragana = translation.slice(0, -2);
@@ -53,7 +64,7 @@ async function convertKanjiToHiragana () {
     });
   }
   console.log('WRITING FILES');
-  writeJson('./data/raw-data-test.json', original);
+  writeJson('./data/raw-data.json', original);
   console.log('DONE');
 }
 
