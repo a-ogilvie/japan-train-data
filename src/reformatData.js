@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
-const writeJson = require("./utils/json/write");
+const writeJson = require('./utils/json/write');
 
-const data = require("../data/raw-data.json");
+const data = require('../data/raw-data.json');
 
 const reformatted = [];
 
@@ -14,18 +14,17 @@ data.forEach((prefecture) => {
     delete line.lat;
     delete line.lng;
     line.id = line.id.toString();
+    line._id = line.id;
     // delete location stuff from each station
     line.stations.forEach((station) => {
+      station.id = station.id.toString();
+      station._id = station.id;
       delete station.gid;
       station.lat = station.location.lat;
       station.lng = station.location.lng;
-      station.zipCode = station.location.postalCode.ja.replace(/[^0-9]/g, "");
+      station.zipCode = station.location.postalCode.ja.replace(/[^0-9]/g, '');
       delete station.location;
-      const lineIds = [];
-      station.lines.forEach((line) => {
-        lineIds.push(line.id);
-      });
-      station.lines = lineIds;
+      station.lines = station.lines.map(line => line.id.toString());
     });
     reformatted.push(JSON.parse(JSON.stringify(line)));
   });
@@ -52,18 +51,37 @@ reformatted.forEach((line) => {
   }
 });
 
-const deduplicated = reformatted.filter((line) => !line.delete);
+const linesToStations = {};
 
-writeJson("./data/formatted-data.json", deduplicated);
+reformatted.forEach((line) => {
+  line.stations.forEach((station) => {
+    if (linesToStations.hasOwnProperty(line.id)) {
+      linesToStations[line.id].push(station.id.toString());
+    } else {
+      linesToStations[line.id] = [station.id.toString()];
+    }
+  });
+});
 
-// reformatted.forEach((line) => {
-//   line.stations.forEach((station, i) => {
-//     if (/[^0-9a-zA-ZāōŌūŪ <>()-.'/]/.test(station.name.en)) {
-//       console.log(
-//         `${station.id} ${station.prefecture.en} ${station.name.ja} ${
-//           station.name.en
-//         } ${station.lat} ${station.lng}`
-//       );
-//     }
-//   });
-// });
+const deduplicatedStationIds = new Set();
+const stations = [];
+
+reformatted.forEach((line) => {
+  line.stations.forEach((station) => {
+    deduplicatedStationIds.add(station.id);
+    stations.push(station);
+  });
+});
+
+const deduplicatedStations = Array.from(deduplicatedStationIds).map(id =>
+  stations.find(station => station.id === id),
+);
+
+reformatted.forEach((line) => {
+  line.stations = linesToStations[line.id];
+});
+
+const deduplicatedLines = reformatted.filter(line => !line.delete);
+
+writeJson('./data/formatted-data-lines.json', deduplicatedLines);
+writeJson('./data/formatted-data-stations.json', deduplicatedStations);
